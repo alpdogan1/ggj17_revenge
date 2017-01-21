@@ -4,6 +4,7 @@ using System.Collections;
 public class Level : MonoBehaviour
 {
 	private ReactingBlock[] _blocks;
+	public float speed = .04f;
 
 	void Start()
 	{
@@ -16,7 +17,7 @@ public class Level : MonoBehaviour
 		{
 //			child.GetComponent<Rigidbody2D> ().MovePosition (transform.position + Vector3.left * .04f);
 //			Vector2 targetPos =
-			block.targetPosition += Vector3.left * .04f;
+			block.targetPosition += Vector3.left * speed;
 		}
 
 //		transform.position += Vector3.left * .04f;
