@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
 	public List<ReactingBlock> blocks;
 	public LayerMask groundLayer;
 
+	public Player2 player;
 
 	void Start()
 	{

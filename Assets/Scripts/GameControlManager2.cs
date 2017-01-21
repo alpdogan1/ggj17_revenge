@@ -21,15 +21,14 @@ public class GameControlManager2 : MonoBehaviour {
 	[Header("Reaction")]
 	public float influenceRadius = 2f;
 	public float maxInfluenceElevation = 4f;
-
-	public float threshold = 0.03f;
-
-//	[Header("New Reaction")]
+	[Space]
 	public float moveUpTime = .2f;
 	public LeanTweenType moveUpEasing = LeanTweenType.easeInSine;
+
 	public float moveDownTime = .1f;
 	public LeanTweenType moveDownEasing = LeanTweenType.easeInSine;
-
+//	public float bounceForceMult = 20f;
+	public Vector2 maxBounceForce = Vector2.up;
 
 	void Start()
 	{
@@ -77,18 +76,10 @@ public class GameControlManager2 : MonoBehaviour {
 					currentKey = keys [i];
 					print ("Current key is " + currentKey.ToString ());
 
-//					KeyPower kp = new KeyPower (i);
 					KeyPower kp = gameObject.AddComponent<KeyPower> ();
 					kp.Init (i);
 
-//					foreach (var lkp in livingKeyPowers) 
-//					{
-//						if(kp.Index == lkp.Index)
-//						{
-//							LeanTween.cancel (lkp.gameObject);
-//						}
-//					}
-
+					activeKeyPower = kp;
 					livingKeyPowers.Add (kp);
 
 //					foreach (var block in GameManager.Instance.blocks)
@@ -137,12 +128,13 @@ public class GameControlManager2 : MonoBehaviour {
 //		return 0;
 		foreach (var kp in livingKeyPowers) 
 		{
-			float el = kp.GetElevationForPositionX (go.transform.position.x);
+			float el = kp.GetElevationForPosition (go.transform.position);
 			totalEl += el;
 		}
 
 		totalEl = Mathf.Clamp (totalEl, 0, maxInfluenceElevation);
 
 		return totalEl;
+
 	}
 }
