@@ -20,40 +20,29 @@ public class ReactingBlock : MonoBehaviour
 	{
 		_cachedLocalPos = transform.localPosition;
 		_rigibody = GetComponent<Rigidbody2D> ();
-		targetPosition = transform.position;
+//		targetPosition = transform.position;
+	}
+
+	public void ReCache()
+	{
+		_cachedLocalPos =transform.localPosition;
 	}
 
 	void Update()
 	{
 		RefreshElevation ();
-	}
 
-	void FixedUpdate()
-	{
-//		_rigibody.MovePosition (targetPosition + transform.parent.position);
-		transform.position = targetPosition + transform.parent.position;
-//	
-//		if (transform.position.y < m_lastPosition)
-//		{
-//			Bounce ();
-//		}
-	}
-
-	private void Bounce()
-	{
-		
+		// Move
+		transform.position += Vector3.left * GameManager.Instance.levelSpeed;
 	}
 
 	private void RefreshElevation()
 	{
 		float elevation = GameControlManager2.Instance.GetPositionFor (gameObject);
 
-//		Vector3 currentOrTargetPos = targetPosition == null ? transform.position : (Vector3)targetPosition;
+		Vector3 newPos = new Vector3 ( transform.position.x, _cachedLocalPos.y) + (Vector3.up * elevation);
 
-		Vector3 newPos = new Vector3 ( targetPosition.x, _cachedLocalPos.y) + (Vector3.up * elevation);
-//		transform.position = newPos;
-//		_rigibody.MovePosition (newPos);
-		targetPosition = newPos;
+		transform.position = newPos;
 	}
 
 }

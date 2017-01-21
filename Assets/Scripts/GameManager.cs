@@ -13,21 +13,28 @@ public class GameManager : MonoBehaviour
 	}
 
 	#endregion
-
+	public float levelSpeed = .1f;
 	public float blockCountForKey = 1;
-	public Transform blockContainer;
-	public List<ReactingBlock> blocks;
+//	public Transform blockContainer;
+//	public List<ReactingBlock> blocks;
 	public LayerMask groundLayer;
 
 	public Player2 player;
+
+	public Bounds CameraBounds{
+		get{
+			return GetCameraBounds (Camera.main);
+		}
+	}
+
 
 	void Start()
 	{
 		SetCameraSize ();
 
 		// Gather blocks
-		ReactingBlock[] blocksArr = blockContainer.GetComponentsInChildren<ReactingBlock> ();
-		blocks = new List<ReactingBlock> (blocksArr);
+//		ReactingBlock[] blocksArr = blockContainer.GetComponentsInChildren<ReactingBlock> ();
+//		blocks = new List<ReactingBlock> (blocksArr);
 
 	}
 
@@ -43,6 +50,19 @@ public class GameManager : MonoBehaviour
 
 		Camera.main.orthographicSize = expH / 2;
 	}
+
+
+	Bounds GetCameraBounds (Camera cam)
+	{
+
+		float screenAspect = (float)Screen.width / (float)Screen.height;
+		float cameraHeight = cam.orthographicSize * 2;
+		Bounds newBounds = new Bounds(
+			cam.transform.position,
+			new Vector3(cameraHeight * screenAspect, cameraHeight, 0));
+		return newBounds;
+	}
+
 //
 //	void SpawnInitialBlocks()
 //	{
