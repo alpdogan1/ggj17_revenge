@@ -28,7 +28,10 @@ public class GameControlManager2 : MonoBehaviour {
 	public float moveDownTime = .1f;
 	public LeanTweenType moveDownEasing = LeanTweenType.easeInSine;
 //	public float bounceForceMult = 20f;
-	public Vector2 maxBounceForce = Vector2.up;
+//	public Vector2 maxBounceForce = Vector2.up;
+	[Range(0,1)]
+	public float topBouncePercent = .84f;
+	public float bounceForceMaxMagnitude = 10f;
 
 	void Start()
 	{

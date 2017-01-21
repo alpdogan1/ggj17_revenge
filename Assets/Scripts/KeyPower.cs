@@ -28,17 +28,22 @@ public class KeyPower : MonoBehaviour
 		this.index = index;
 		this.keyCode = GameControlManager2.Instance.keys[index];
 
+
+		// Block move up
 		currentTween = LeanTween.value (power, 1, GameControlManager2.Instance.moveUpTime)
 			.setEase (GameControlManager2.Instance.moveUpEasing)
-			.setOnComplete (() => {
-				isSatisfied = true;
-
+//			.setOnComplete (() => {
+//				
+//			})
+			.setOnUpdate((value)=>{
+				
 				print ("Top Bounce");
-				BouncePlayer();
-//				GameManager.Instance.player.Bounced( GetElevationForPositionX(GameManager.Instance.player.gameObject.transform.position.x) * Vector3.up * GameControlManager2.Instance.bounceForceMult);
-				// TODO: Bounce!
-			}).setOnUpdate((value)=>{
 				power = value;
+				if(power >= GameControlManager2.Instance.topBouncePercent)
+				{
+					BouncePlayer();
+					isSatisfied = true;
+				}
 			});
 
 		StartCoroutine (ListenForRelease () );
@@ -52,6 +57,7 @@ public class KeyPower : MonoBehaviour
 		{
 			yield return true;
 		}
+
 
 		print ("Key Power Released, " + keyCode.ToString());
 		Released ();
@@ -154,7 +160,7 @@ public class KeyPower : MonoBehaviour
 
 		float impactPercent = GetImpactForPos (pos);
 
-		float maxMagn = 10f;
+		float maxMagn = GameControlManager2.Instance.bounceForceMaxMagnitude;
 		float angle = (1 - impactPercent) * 90;
 
 
@@ -193,8 +199,8 @@ public class KeyPower : MonoBehaviour
 		GameControlManager2.Instance.KeyReleased(this);
 
 		LeanTween.cancel (currentTween.uniqueId);
-//		LeanTween.cancel (gameObject);
 
+		// Block move down
 		LeanTween.value (power, 0, GameControlManager2.Instance.moveDownTime)
 //			.setDelay (.2f)
 			.setEase (GameControlManager2.Instance.moveDownEasing)

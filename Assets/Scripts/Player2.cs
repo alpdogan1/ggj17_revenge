@@ -25,6 +25,10 @@ public class Player2 : MonoBehaviour
 	[Header ("Constraints")]
 	[SerializeField]RigidbodyConstraints2D normalConstraints = RigidbodyConstraints2D.FreezeAll;
 	[SerializeField]RigidbodyConstraints2D airConstraints = RigidbodyConstraints2D.FreezeAll;
+
+	[Header("HorizontalMovement")]
+	[SerializeField]float _targetPosX;
+
 	void Start ()
 	{
 		m_rigidbody = GetComponent<Rigidbody2D> ();
@@ -55,7 +59,9 @@ public class Player2 : MonoBehaviour
 		//		else
 		//		{
 		// we use world-relative directions in the case of no main camera
-		move = (v*Vector3.forward + h*Vector3.right).normalized;
+//		move = (v*Vector3.forward + h*Vector3.right).normalized;
+		_targetPosX = transform.position.x + (h * 4);
+		_targetPosX = Mathf.Clamp (_targetPosX, GameManager.Instance.CameraBounds.min.x, GameManager.Instance.CameraBounds.max.x);
 	}
 
 	private Vector3 move;
@@ -80,8 +86,10 @@ public class Player2 : MonoBehaviour
 		//		else
 		//		{
 		// Otherwise add force in the move direction.
-		m_rigidbody.AddForce(moveDirection*m_MovePower);
-		//		}
+//		m_rigidbody.AddForce(moveDirection*m_MovePower)
+
+		Vector3 targetPos = new Vector3 (_targetPosX, transform.position.y);
+		transform.position = Vector3.Lerp (transform.position, targetPos, Time.deltaTime * m_MovePower);
 
 		// If on the ground and jump is pressed...
 		if (m_isGrounded && jump)
