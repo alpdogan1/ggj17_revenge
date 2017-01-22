@@ -3,7 +3,7 @@ using System.Collections;
 
 public class ReactingBlock : GroundReactorStatic
 {
-	private Vector3 _cachedLocalPos;
+//	private Vector3 _cachedLocalPos;
 	private bool _isMovingUp = false;
 	private Rigidbody2D _rigibody;
 	public float NormalElevation{

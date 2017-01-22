@@ -1,55 +1,32 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityStandardAssets.CrossPlatformInput;
+using Com.LuisPedroFonseca.ProCamera2D;
 
 public class Player2 : GroundReactorDynamic
 {
-//	[SerializeField]private float k_speed = 1f;
-//	[SerializeField]private float k_GroundRayLength = 10f; // The length of the ray to check if the ball is grounded.
-//	[SerializeField]private float k_groundedDistance = .1f; // The length of the ray to check if the ball is grounded.
-//	[SerializeField]private bool m_isGrounded = false;
-//	private Rigidbody2D m_Rigidbody;
 
-//	[SerializeField]ReactingBlock block;
-//	[SerializeField]private Rigidbody2D m_rigidbody;
-//	[SerializeField]private CircleCollider2D m_collider;
-//	[SerializeField]private Vector3 m_lastPosition;
-//	[SerializeField]private float m_groundDetDelay = .1f;
-//	[SerializeField]private float m_curGroundDetDelay = 0;
-//	[SerializeField]private bool m_groundDetDelayed = false;
+	[SerializeField]private bool isDead = false;
+	[SerializeField]private float dieDuration = .4f;
+	[SerializeField]private AnimationCurve dieEasingCurve;
 
+	public int lives = 3;
 	[Header("Movement")]
 	[SerializeField] private float m_MovePower = 5; // The force added to the ball to move it.
 	[SerializeField] private float m_JumpPower = 2;
 
-	[Header ("Constraints")]
-	[SerializeField]RigidbodyConstraints2D normalConstraints = RigidbodyConstraints2D.FreezeAll;
-	[SerializeField]RigidbodyConstraints2D airConstraints = RigidbodyConstraints2D.FreezeAll;
-
 	[Header("HorizontalMovement")]
 	[SerializeField]float _targetPosX;
-//	[Space]
-//	[SerializeField]Animator _animator;
-
-//	void Start ()
-//	{
-//		m_rigidbody = GetComponent<Rigidbody2D> ();
-//		m_collider = GetComponent<CircleCollider2D> ();
-//	}
 	
-	void Update ()
+	protected override void FixedUpdate ()
 	{
-		base.Update ();
-//		float posY = GameControlManager2.Instance.GetPositionFor (gameObject);
-//
-//		if (m_isGrounded)
-//		{
-//			transform.position = new Vector3(transform.position.x, posY + m_collider.radius);
-//		}
+		base.FixedUpdate ();
+		if(!isDead)
+			CheckMinY ();
 
 		// Movement
 		float h = CrossPlatformInputManager.GetAxis("Horizontal");
-		float v = CrossPlatformInputManager.GetAxis("Vertical");
+//		float v = CrossPlatformInputManager.GetAxis("Vertical");
 		jump = CrossPlatformInputManager.GetButtonDown("Jump");
 
 		_targetPosX = transform.position.x + (h * 4);
@@ -58,8 +35,13 @@ public class Player2 : GroundReactorDynamic
 
 	private Vector3 move;
 	private bool jump; 
-	private void FixedUpdate()
+	protected override void Update()
 	{
+		if(!isDead)
+			CheckMinY ();
+		
+		base.Update();
+
 		// Call the Move function of the ball controller
 		Move(move, jump);
 		jump = false;
@@ -67,7 +49,6 @@ public class Player2 : GroundReactorDynamic
 
 	public void Move(Vector3 moveDirection, bool jump)
 	{
-
 		Vector3 targetPos = new Vector3 (_targetPosX, transform.position.y);
 
 		float newMovePower = m_isGrounded ? m_MovePower : m_MovePower * .6f;
@@ -87,64 +68,62 @@ public class Player2 : GroundReactorDynamic
 
 			StartCoroutine (WaitForGrounded ());
 		}
+
+		float minX = GameManager.Instance.CameraBounds.min.x;
+		float maxX = GameManager.Instance.CameraBounds.max.x;
+
+		if(transform.position.x < minX)
+		{
+			transform.position = new Vector3( minX, transform.position.y);
+		}
+		else if(transform.position.x > maxX)
+		{
+			transform.position = new Vector3( maxX, transform.position.y);
+		}
 	}
 
-//	public void Bounced(Vector3 force)
-//	{
-//		print ("Bounced Force = " + 		force.ToString());
-//		print ("Bounced Force Magnt = " + 	force.magnitude);
-//
-//		if (force.sqrMagnitude < .1f * .1f)
-//		{
-//			print ("Not bouncing! Bounce too small!");
-//			return;
-//		}
-//
-//		if(!m_isGrounded)
-//		{
-//			print ("Not bouncing! Already bouncing!!");
-//			return;
-//		}
-//		
-//		print ("Bouncing!");
-//
-//		// Min force
-//		float minMagn = 4;
-//		if(force.sqrMagnitude < minMagn * minMagn)
-//		{
-//			print ("Increasing Force");
-//			force = force.normalized * minMagn;
-//		}
-//
-//		_animator.SetTrigger ("Bounce");
-//		m_isGrounded = false;
-//		m_rigidbody.velocity = Vector3.zero;
-//		m_rigidbody.AddForce (force, ForceMode2D.Impulse);
-//
-//		StartCoroutine (WaitForGrounded ());
-//	}
-//
-//	IEnumerator WaitForGrounded()
-//	{
-//		yield return new WaitForSeconds (.2f);
-//		print ("Waiting for ground");
-//		m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
-//		while (transform.position.y - m_collider.radius + 0.2f > GameControlManager2.Instance.GetPositionFor (gameObject))
-//		{
-//			yield return true;
-//		}
-//
-//		Landed ();
-//	}
-//
-//	public void Landed()
-//	{
-//		print ("Landed!");
-//		transform.rotation = Quaternion.identity;
-//		_animator.SetTrigger ("Run");
-//		m_isGrounded = true;
-//		m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
-//	}
+	public void LoseLife()
+	{
+		lives -= 1;
+		StartCoroutine (TouchDelay ());
+		ProCamera2DShake.Instance.Shake ();
+
+		if(lives <= 0)
+		{
+			Die ();
+
+		}
+
+	}
+
+	IEnumerator TouchDelay()
+	{
+		_animator.SetTrigger ("DelayTouch");
+		_animator.SetTrigger ("Bounce");
+		_collider.isTrigger = true;
+
+		yield return new WaitForSeconds (2);
+
+		_collider.isTrigger = false;
+		_animator.SetTrigger ("DelayTouch");
+	}
+
+	public void Die()
+	{
+		isDead = true;
+		_animator.SetTrigger ("Bounce");
+		m_isGrounded = false;
+		this.enabled = false;
+
+		Bounds camBounds = GameManager.Instance.CameraBounds;
+		Vector3 dieTarget = new Vector3 (transform.position.x - .3f,camBounds.min.y - 2f);
+
+		LeanTween.move (gameObject, dieTarget, dieDuration).setEase(dieEasingCurve)
+			.setOnComplete(()=>{
+//				LeanTween.move (gameObject, GameManager.Instance.CameraBounds.min + (Vector3.down * 2), 1f);
+		});
+	}
+
 
 }
 

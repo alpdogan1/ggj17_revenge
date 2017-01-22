@@ -37,9 +37,9 @@ public class KeyPower : MonoBehaviour
 //			})
 			.setOnUpdate((value)=>{
 				
-				print ("Top Bounce");
+//				print ("Top Bounce");
 				power = value;
-				if(power >= GameControlManager2.Instance.topBouncePercent)
+				if(power >= GameControlManager2.Instance.topBouncePercent && !isSatisfied)
 				{
 					BouncePlayer();
 					isSatisfied = true;
@@ -67,12 +67,12 @@ public class KeyPower : MonoBehaviour
 	{
 		foreach (var reactor in GameControlManager2.Instance.dynamicReactors) 
 		{
-//			player = GameManager.Instance.player;
 			Vector3? force = GetForceForPosition (reactor.transform.position);
 
 			if(force != null)
 			{
-				GameManager.Instance.player.Bounced((Vector3)force);
+				Debug.DrawRay (reactor.transform.position, (Vector3)force * .1f, Color.red, .4f);
+				reactor.Bounced((Vector3)force);
 			}
 		}
 
@@ -86,20 +86,21 @@ public class KeyPower : MonoBehaviour
 
 	}
 
-	private float GetKeyPos(float posX)
+	public float GetKeyPos()
 	{
+//		float 	curH = Camera.main.orthographicSize * 2;
+		float 	curW = GameManager.Instance.CameraBounds.size.x;
+		float 	curH = GameManager.Instance.CameraBounds.size.y;
 
-		float 	curH = Camera.main.orthographicSize * 2;
-		float 	curW = Camera.main.aspect * curH;
 
 		// this pos is local to camera
-		float 	keyDownPosLocal = -(curW / 2) + (index * GameManager.Instance.blockCountForKey) - 0.5f;
+		float 	keyDownPosLocal = -(curW / 2) + (index * GameManager.Instance.blockCountForKey) + (GameManager.Instance.blockCountForKey / 2);
 		float 	keyDownPosGlobal = keyDownPosLocal += Camera.main.transform.position.x;
 
-		return keyDownPosGlobal;
+		return 	keyDownPosGlobal * 1.25f;
 	}
 
-	private float GetImpactForPos(Vector3 pos)
+	public float GetImpactForPos(Vector3 pos)
 	{
 //		float 	curH = Camera.main.orthographicSize * 2;
 //		float 	curW = Camera.main.aspect * curH;
@@ -108,7 +109,7 @@ public class KeyPower : MonoBehaviour
 //		float 	keyDownPosLocal = -(curW / 2) + (index * GameManager.Instance.blockCountForKey) - 0.5f;
 //		float 	keyDownPosGlobal = keyDownPosLocal += Camera.main.transform.position.x;
 
-		float 	keyDownPosGlobal = GetKeyPos(pos.x);
+		float 	keyDownPosGlobal = GetKeyPos();
 
 		float 	dif = Mathf.Abs (keyDownPosGlobal - pos.x);
 
@@ -118,22 +119,8 @@ public class KeyPower : MonoBehaviour
 		return 	impactPercent;
 	}
 
-
-
 	public float GetElevationForPosition(Vector3 pos)
 	{
-
-//		float 	curH = Camera.main.orthographicSize * 2;
-//		float 	curW = Camera.main.aspect * curH;
-//
-//		// this pos is local to camera
-//		float 	keyDownPosLocal = -(curW / 2) + (index * GameManager.Instance.blockCountForKey) - 0.5f;
-//		float 	keyDownPosGlobal = keyDownPosLocal += Camera.main.transform.position.x;
-//		float 	dif = Mathf.Abs (keyDownPosGlobal - posX);
-//
-//		float 	influenceRadius = GameControlManager2.Instance.influenceRadius;
-//		float 	impactPercent = 1 - (dif / influenceRadius);
-
 		float impactPercent = GetImpactForPos (pos);
 
 		float _targetElevation = 0;
@@ -178,16 +165,14 @@ public class KeyPower : MonoBehaviour
 		if (impactPercent <= 1 && impactPercent > 0) 
 		{
 			// If at right
-			if(pos.x > GetKeyPos(pos.x))
+			if(pos.x > GetKeyPos())
 			{
 				angle = -angle;
 			}
 
 			force = (Vector2.up).Rotate (angle);
 			
-			force = ((Vector3)force).normalized * impactPercent * maxMagn;
-			Debug.DrawRay (pos, (Vector3)force * .5f, Color.red, 4);
-
+			force = ((Vector3)force).normalized * impactPercent * maxMagn * power;
 		}
 
 

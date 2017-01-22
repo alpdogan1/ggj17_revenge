@@ -72,11 +72,6 @@ public class Spawner : MonoBehaviour {
 
 			newItem.SetActive (true);
 			newItem.transform.position = pos;
-
-			if(newItem.GetComponent<GroundReactorStatic>())
-			{
-				newItem.GetComponent<GroundReactorStatic> ().ReCache ();
-			}
 		} 
 		else
 		{
@@ -84,13 +79,24 @@ public class Spawner : MonoBehaviour {
 			newItem.transform.parent = transform;
 		}
 
+		if(newItem.GetComponent<GroundReactorStatic>())
+		{
+			newItem.GetComponent<GroundReactorStatic> ().ReCache ();
+		}
+
 		activeItems.Add (newItem);
 		lastItem = newItem;
 	}
 
-	void PoolBlock(GameObject block)
+	void PoolItem(GameObject block)
 	{
 //		print("Pooling block!");
+
+		if(block.GetComponent<GroundReactorDynamic>())
+		{
+			block.GetComponent<GroundReactorDynamic> ().Landed ();
+		}
+
 		activeItems.Remove (block);
 		pool.Add (block);
 		block.SetActive (false);
@@ -102,9 +108,9 @@ public class Spawner : MonoBehaviour {
 
 		foreach (var block in blocksDup) 
 		{
-			if(block.transform.position.x < GameManager.Instance.CameraBounds.min.x - 5)
+			if(block.transform.position.x < GameManager.Instance.CameraBounds.min.x - itemWidth - 0.1f)
 			{
-				PoolBlock (block);
+				PoolItem (block);
 			}
 		}
 	}
