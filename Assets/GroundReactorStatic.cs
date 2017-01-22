@@ -3,16 +3,16 @@ using System.Collections;
 
 public class GroundReactorStatic : MonoBehaviour
 {
-	private Vector3 _cachedLocalPos;
+	[SerializeField]protected Vector3 _cachedLocalPos;
 
 	protected virtual void Start()
 	{
-		_cachedLocalPos = transform.localPosition;
+		_cachedLocalPos = transform.position;
 	}
 
 	public void ReCache()
 	{
-		_cachedLocalPos =transform.localPosition;
+		_cachedLocalPos = transform.position;
 	}
 
 	protected void RefreshElevation()

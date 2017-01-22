@@ -53,25 +53,6 @@ public class GameControlManager2 : MonoBehaviour {
 				yield return true;
 				continue;
 			}
-			// A key was down
-//			if(currentKey != KeyCode.None)
-//			{
-//				// Key released
-//				if(Input.GetKeyUp(currentKey))
-//				{
-//					currentKey = KeyCode.None;
-//
-////					foreach (var block in GameManager.Instance.blocks)
-////					{
-////						block.MoveDown ();
-////					}
-//				}
-//				else
-//				{
-//					yield return true;
-//					continue;
-//				}
-//			}
 
 			// Listen for key down
 			for (int i = 0; i < keys.Length; i++) 
@@ -83,6 +64,8 @@ public class GameControlManager2 : MonoBehaviour {
 
 					KeyPower kp = gameObject.AddComponent<KeyPower> ();
 					kp.Init (i);
+
+					Debug.DrawRay (new Vector3(kp.GetKeyPos(), 0), Vector3.up, Color.blue, 2);
 
 					activeKeyPower = kp;
 					livingKeyPowers.Add (kp);
@@ -119,16 +102,16 @@ public class GameControlManager2 : MonoBehaviour {
 	public float GetPositionFor(GameObject go)
 	{
 		float totalEl = 0;
-//		for (int i = livingKeyPowers.Count - 1; i >= 0; i--) 
-//		{
-//			KeyPower kp = livingKeyPowers [i];
-//
-//			float el = kp.GetElevationForPositionX (go.transform.position.x);
+		for (int i = livingKeyPowers.Count - 1; i >= 0; i--) 
+		{
+			KeyPower kp = livingKeyPowers [i];
+
+			float el = kp.GetElevationForPosition (go.transform.position);
 //			totalEl += el;
-////			el = Mathf.Clamp (el, 0, maxInfluenceElevation);
-//
-////			return el;
-//		}
+			el = Mathf.Clamp (el, 0, maxInfluenceElevation);
+
+			return el;
+		}
 
 //		return 0;
 		foreach (var kp in livingKeyPowers) 
