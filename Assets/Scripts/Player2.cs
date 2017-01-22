@@ -82,17 +82,29 @@ public class Player2 : GroundReactorDynamic
 		}
 	}
 
+	public void KilledMob()
+	{
+		_rigidbody.velocity = Vector3.zero;
+		_rigidbody.AddForce (Vector3.up * 10, ForceMode2D.Impulse);
+	}
+
 	public void LoseLife()
 	{
 		lives -= 1;
-		StartCoroutine (TouchDelay ());
+
 		ProCamera2DShake.Instance.Shake ();
 
-		if(lives <= 0)
-		{
-			Die ();
+		if (lives <= 0) {
 
+			Die ();
+			
+		} else
+		{
+			StartCoroutine (TouchDelay ());
 		}
+
+		_collider.isTrigger = true;
+
 
 	}
 
@@ -100,7 +112,7 @@ public class Player2 : GroundReactorDynamic
 	{
 		_animator.SetTrigger ("DelayTouch");
 		_animator.SetTrigger ("Bounce");
-		_collider.isTrigger = true;
+//		_collider.isTrigger = true;
 
 		yield return new WaitForSeconds (2);
 
@@ -114,16 +126,79 @@ public class Player2 : GroundReactorDynamic
 		_animator.SetTrigger ("Bounce");
 		m_isGrounded = false;
 		this.enabled = false;
+		_rigidbody.velocity = Vector3.zero;
+		_rigidbody.constraints = RigidbodyConstraints2D.FreezeAll;
 
 		Bounds camBounds = GameManager.Instance.CameraBounds;
 		Vector3 dieTarget = new Vector3 (transform.position.x - .3f,camBounds.min.y - 2f);
 
 		LeanTween.move (gameObject, dieTarget, dieDuration).setEase(dieEasingCurve)
 			.setOnComplete(()=>{
+				StartCoroutine(Swap());
 //				LeanTween.move (gameObject, GameManager.Instance.CameraBounds.min + (Vector3.down * 2), 1f);
 		});
 	}
 
+	IEnumerator Swap()
+	{
+		
+		if(GameManager.Instance.currentPlayerIndex == 0)
+		{
+			GameManager.Instance.currentPlayerIndex = 1;
+		}
+		else
+		{
+			GameManager.Instance.currentPlayerIndex = 0;
+		}
+
+		lives = 5;
+		m_isGrounded = false;
+
+		yield return new WaitForSeconds (2f);
+
+		// Throw Char
+		Vector3 firstRespawnPos = new Vector3(GameManager.Instance.CameraBounds.min.x, GameManager.Instance.CameraBounds.min.y + 4, 0);
+		transform.position = firstRespawnPos;
+
+		_collider.isTrigger = true;
+		_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
+		_rigidbody.velocity = Vector3.zero;
+		_rigidbody.AddForce (Vector3.right * 10, ForceMode2D.Impulse);
+
+		yield return new WaitForSeconds (.1f);
+
+		// Stop Charactedr phase
+		float cachedTS = Time.timeScale;
+
+		// Stop Level
+		float cachedLS = GameManager.Instance.levelSpeed;
+		GameManager.Instance.levelSpeed = 0;
+
+		// Stop Char
+		_rigidbody.constraints = RigidbodyConstraints2D.FreezeAll;
+
+		// Wait for key
+		while(!CrossPlatformInputManager.GetButtonDown("Jump"))
+		{
+			yield return true;
+		}
+
+		_rigidbody.velocity = Vector3.zero;
+		_rigidbody.AddForce (Vector3.right * 7, ForceMode2D.Impulse);
+		_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+		GameManager.Instance.levelSpeed = cachedLS;
+//		Time.timeScale = cachedTS;
+
+		this.enabled = true;
+		isDead = false;
+		StartCoroutine (WaitForGrounded ());
+
+		_animator.SetTrigger ("DelayTouch");
+		yield return new WaitForSeconds (5f);
+		_animator.SetTrigger ("DelayTouch");
+		_collider.isTrigger = false;
+	}
 
 }
 

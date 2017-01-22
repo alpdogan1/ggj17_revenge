@@ -104,11 +104,15 @@ public class Spawner : MonoBehaviour {
 
 	protected void WatchItems()
 	{
-		GameObject[] blocksDup = activeItems.ToArray ();
+		GameObject[] activeItemsDup = activeItems.ToArray ();
 
-		foreach (var block in blocksDup) 
+		foreach (var block in activeItemsDup) 
 		{
-			if(block.transform.position.x < GameManager.Instance.CameraBounds.min.x - itemWidth - 0.1f)
+			if(block == null)
+			{
+				activeItems.Remove (block);
+			}
+			else if(block.transform.position.x < GameManager.Instance.CameraBounds.min.x - itemWidth - 0.1f)
 			{
 				PoolItem (block);
 			}

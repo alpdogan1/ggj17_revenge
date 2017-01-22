@@ -21,12 +21,16 @@ public class GameManager : MonoBehaviour
 
 	public Player2 player;
 
+	[Header("THE GAME")]
+	public int currentPlayerIndex = 0;
+	public float[] playerDistances = new float[]{0,0};
+	public float targetDistance = 50f;
+
 	public Bounds CameraBounds{
 		get{
 			return GetCameraBounds (Camera.main);
 		}
 	}
-
 
 	void Start()
 	{
@@ -36,6 +40,11 @@ public class GameManager : MonoBehaviour
 //		ReactingBlock[] blocksArr = blockContainer.GetComponentsInChildren<ReactingBlock> ();
 //		blocks = new List<ReactingBlock> (blocksArr);
 
+	}
+
+	void Update()
+	{
+		RecordDistances ();
 	}
 
 	public void SetCameraSize()
@@ -51,7 +60,6 @@ public class GameManager : MonoBehaviour
 		Camera.main.orthographicSize = expH / 2;
 	}
 
-
 	Bounds GetCameraBounds (Camera cam)
 	{
 
@@ -63,6 +71,10 @@ public class GameManager : MonoBehaviour
 		return newBounds;
 	}
 
+	void RecordDistances()
+	{
+		playerDistances [currentPlayerIndex] += levelSpeed;
+	}
 //
 //	void SpawnInitialBlocks()
 //	{

@@ -116,5 +116,6 @@ public class Player : MonoBehaviour
 		Move(move, jump);
 		jump = false;
 	}
+
 //}
 }
