@@ -5,6 +5,7 @@ public class Zombie : GroundReactorDynamic
 {
 	[SerializeField]float speed = .2f;
 	[SerializeField]float randomRange = .4f;
+	[SerializeField]float height = 1f;
 
 	void Awake()
 	{
@@ -28,7 +29,7 @@ public class Zombie : GroundReactorDynamic
 	{
 		CheckMinY ();
 		base.Update ();
-		transform.position += Vector3.left * speed;
+		transform.position += Vector3.left * (speed + GameManager.Instance.levelSpeed);
 //		_rigidbody.AddForce (Vector2.left * speed);
 	}
 
@@ -36,7 +37,19 @@ public class Zombie : GroundReactorDynamic
 	{
 		if(coll.transform.GetComponent<Player2>())
 		{
-			coll.transform.GetComponent<Player2> ().LoseLife ();
+			if (coll.transform.position.y > transform.position.y + height) {
+
+				GameControlManager2.Instance.dynamicReactors.Remove (this);
+				coll.transform.GetComponent<Player2>().KilledMob ();
+
+				Destroy (gameObject);
+
+			} 
+			else
+			{
+				coll.transform.GetComponent<Player2> ().LoseLife ();
+			}
+
 		}
 	}
 
