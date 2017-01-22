@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ReactingBlock : MonoBehaviour
+public class ReactingBlock : GroundReactorStatic
 {
 	private Vector3 _cachedLocalPos;
 	private bool _isMovingUp = false;
@@ -16,17 +16,23 @@ public class ReactingBlock : MonoBehaviour
 
 	private Vector3 m_lastPosition;
 
-	void Start()
+//	void Start()
+//	{
+//		_cachedLocalPos = transform.localPosition;
+//		_rigibody = GetComponent<Rigidbody2D> ();
+////		targetPosition = transform.position;
+//	}
+
+	protected override void Start ()
 	{
-		_cachedLocalPos = transform.localPosition;
+		base.Start ();
 		_rigibody = GetComponent<Rigidbody2D> ();
-//		targetPosition = transform.position;
 	}
 
-	public void ReCache()
-	{
-		_cachedLocalPos =transform.localPosition;
-	}
+//	public void ReCache()
+//	{
+//		_cachedLocalPos =transform.localPosition;
+//	}
 
 	void Update()
 	{
@@ -36,14 +42,14 @@ public class ReactingBlock : MonoBehaviour
 		transform.position += Vector3.left * GameManager.Instance.levelSpeed;
 	}
 
-	private void RefreshElevation()
-	{
-		float elevation = GameControlManager2.Instance.GetPositionFor (gameObject);
-
-		Vector3 newPos = new Vector3 ( transform.position.x, _cachedLocalPos.y) + (Vector3.up * elevation);
-
-		transform.position = newPos;
-	}
+//	private void RefreshElevation()
+//	{
+//		float elevation = GameControlManager2.Instance.GetPositionFor (gameObject);
+//
+//		Vector3 newPos = new Vector3 ( transform.position.x, _cachedLocalPos.y) + (Vector3.up * elevation);
+//
+//		transform.position = newPos;
+//	}
 
 }
 

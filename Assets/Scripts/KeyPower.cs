@@ -65,13 +65,24 @@ public class KeyPower : MonoBehaviour
 
 	private void BouncePlayer()
 	{
-		Player2 player = GameManager.Instance.player;
-		Vector3? force = GetForceForPosition (player.transform.position);
-
-		if(force != null)
+		foreach (var reactor in GameControlManager2.Instance.dynamicReactors) 
 		{
-			GameManager.Instance.player.Bounced((Vector3)force);
+//			player = GameManager.Instance.player;
+			Vector3? force = GetForceForPosition (reactor.transform.position);
+
+			if(force != null)
+			{
+				GameManager.Instance.player.Bounced((Vector3)force);
+			}
 		}
+
+//		Player2 player = GameManager.Instance.player;
+//		Vector3? force = GetForceForPosition (player.transform.position);
+//
+//		if(force != null)
+//		{
+//			GameManager.Instance.player.Bounced((Vector3)force);
+//		}
 
 	}
 

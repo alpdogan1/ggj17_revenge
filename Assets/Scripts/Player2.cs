@@ -2,17 +2,17 @@
 using System.Collections;
 using UnityStandardAssets.CrossPlatformInput;
 
-public class Player2 : MonoBehaviour
+public class Player2 : GroundReactorDynamic
 {
 //	[SerializeField]private float k_speed = 1f;
 //	[SerializeField]private float k_GroundRayLength = 10f; // The length of the ray to check if the ball is grounded.
 //	[SerializeField]private float k_groundedDistance = .1f; // The length of the ray to check if the ball is grounded.
-	[SerializeField]private bool m_isGrounded = false;
+//	[SerializeField]private bool m_isGrounded = false;
 //	private Rigidbody2D m_Rigidbody;
 
 //	[SerializeField]ReactingBlock block;
-	[SerializeField]private Rigidbody2D m_rigidbody;
-	[SerializeField]private CircleCollider2D m_collider;
+//	[SerializeField]private Rigidbody2D m_rigidbody;
+//	[SerializeField]private CircleCollider2D m_collider;
 //	[SerializeField]private Vector3 m_lastPosition;
 //	[SerializeField]private float m_groundDetDelay = .1f;
 //	[SerializeField]private float m_curGroundDetDelay = 0;
@@ -28,38 +28,30 @@ public class Player2 : MonoBehaviour
 
 	[Header("HorizontalMovement")]
 	[SerializeField]float _targetPosX;
+//	[Space]
+//	[SerializeField]Animator _animator;
 
-	void Start ()
-	{
-		m_rigidbody = GetComponent<Rigidbody2D> ();
-		m_collider = GetComponent<CircleCollider2D> ();
-	}
+//	void Start ()
+//	{
+//		m_rigidbody = GetComponent<Rigidbody2D> ();
+//		m_collider = GetComponent<CircleCollider2D> ();
+//	}
 	
 	void Update ()
 	{
-		float posY = GameControlManager2.Instance.GetPositionFor (gameObject);
+		base.Update ();
+//		float posY = GameControlManager2.Instance.GetPositionFor (gameObject);
+//
+//		if (m_isGrounded)
+//		{
+//			transform.position = new Vector3(transform.position.x, posY + m_collider.radius);
+//		}
 
-		if (m_isGrounded)
-		{
-			transform.position = new Vector3(transform.position.x, posY + m_collider.radius);
-		}
-
-
+		// Movement
 		float h = CrossPlatformInputManager.GetAxis("Horizontal");
 		float v = CrossPlatformInputManager.GetAxis("Vertical");
 		jump = CrossPlatformInputManager.GetButtonDown("Jump");
 
-		// calculate move direction
-		//		if (cam != null)
-		//		{
-		//			// calculate camera relative direction to move:
-		//			camForward = Vector3.Scale(cam.forward, new Vector3(1, 0, 1)).normalized;
-		//			move = (v*camForward + h*cam.right).normalized;
-		//		}
-		//		else
-		//		{
-		// we use world-relative directions in the case of no main camera
-//		move = (v*Vector3.forward + h*Vector3.right).normalized;
 		_targetPosX = transform.position.x + (h * 4);
 		_targetPosX = Mathf.Clamp (_targetPosX, GameManager.Instance.CameraBounds.min.x, GameManager.Instance.CameraBounds.max.x);
 	}
@@ -68,87 +60,91 @@ public class Player2 : MonoBehaviour
 	private bool jump; 
 	private void FixedUpdate()
 	{
-
 		// Call the Move function of the ball controller
 		Move(move, jump);
 		jump = false;
 	}
 
-
 	public void Move(Vector3 moveDirection, bool jump)
 	{
-		// If using torque to rotate the ball...
-		//		if (m_UseTorque)
-		//		{
-		//			// ... add torque around the axis defined by the move direction.
-		//			m_Rigidbody.AddTorque(new Vector3(moveDirection.z, 0, -moveDirection.x)*m_MovePower);
-		//		}
-		//		else
-		//		{
-		// Otherwise add force in the move direction.
-//		m_rigidbody.AddForce(moveDirection*m_MovePower)
 
 		Vector3 targetPos = new Vector3 (_targetPosX, transform.position.y);
-		transform.position = Vector3.Lerp (transform.position, targetPos, Time.deltaTime * m_MovePower);
+
+		float newMovePower = m_isGrounded ? m_MovePower : m_MovePower * .6f;
+
+		transform.position = Vector3.Lerp (transform.position, targetPos, Time.deltaTime * newMovePower);
 
 		// If on the ground and jump is pressed...
 		if (m_isGrounded && jump)
 		{
 			// ... add force in upwards.
+			_animator.SetTrigger ("Jump");
 			m_isGrounded = false;
+			_rigidbody.velocity = Vector3.zero;
+			_rigidbody.AddForce(Vector3.up* m_JumpPower, ForceMode2D.Impulse);
+			print ("Bounced Force = " + 		(Vector3.up* m_JumpPower).ToString());
+			print ("Bounced Force Magnt = " + 	(Vector3.up* m_JumpPower).magnitude);
+
 			StartCoroutine (WaitForGrounded ());
-			m_rigidbody.AddForce(Vector3.up* m_JumpPower, ForceMode2D.Impulse);
 		}
 	}
 
-
-	public void Bounced(Vector3 force)
-	{
-		print ("Bounced Force = " + 		force.ToString());
-		print ("Bounced Force Magnt = " + 	force.magnitude);
-
-		if (force.sqrMagnitude < .1f * .1f)
-		{
-			print ("Not bouncing! Bounce too small!");
-			return;
-		}
-
-		if(!m_isGrounded)
-		{
-			print ("Not bouncing! Already bouncing!!");
-			return;
-		}
-		
-		print ("Bouncing!");
-
-//		m_rigidbody.bodyType = RigidbodyType2D.Dynamic;
-		m_isGrounded = false;
-		m_rigidbody.AddForce (force, ForceMode2D.Impulse);
-
-		StartCoroutine (WaitForGrounded ());
-	}
-
-	IEnumerator WaitForGrounded()
-	{
-//		while(!m_isGrounded)
-		print ("Waiting for ground");
-		m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
-		while (transform.position.y - m_collider.radius + 0.2f > GameControlManager2.Instance.GetPositionFor (gameObject))
-		{
-			yield return true;
-		}
-
-		Landed ();
-	}
-
-	public void Landed()
-	{
-		print ("Landed!");
-		m_isGrounded = true;
-		m_rigidbody.constraints = RigidbodyConstraints2D.FreezePositionY;
-//		m_rigidbody.bodyType = RigidbodyType2D.Kinematic;
-	}
-
+//	public void Bounced(Vector3 force)
+//	{
+//		print ("Bounced Force = " + 		force.ToString());
+//		print ("Bounced Force Magnt = " + 	force.magnitude);
+//
+//		if (force.sqrMagnitude < .1f * .1f)
+//		{
+//			print ("Not bouncing! Bounce too small!");
+//			return;
+//		}
+//
+//		if(!m_isGrounded)
+//		{
+//			print ("Not bouncing! Already bouncing!!");
+//			return;
+//		}
+//		
+//		print ("Bouncing!");
+//
+//		// Min force
+//		float minMagn = 4;
+//		if(force.sqrMagnitude < minMagn * minMagn)
+//		{
+//			print ("Increasing Force");
+//			force = force.normalized * minMagn;
+//		}
+//
+//		_animator.SetTrigger ("Bounce");
+//		m_isGrounded = false;
+//		m_rigidbody.velocity = Vector3.zero;
+//		m_rigidbody.AddForce (force, ForceMode2D.Impulse);
+//
+//		StartCoroutine (WaitForGrounded ());
+//	}
+//
+//	IEnumerator WaitForGrounded()
+//	{
+//		yield return new WaitForSeconds (.2f);
+//		print ("Waiting for ground");
+//		m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
+//		while (transform.position.y - m_collider.radius + 0.2f > GameControlManager2.Instance.GetPositionFor (gameObject))
+//		{
+//			yield return true;
+//		}
+//
+//		Landed ();
+//	}
+//
+//	public void Landed()
+//	{
+//		print ("Landed!");
+//		transform.rotation = Quaternion.identity;
+//		_animator.SetTrigger ("Run");
+//		m_isGrounded = true;
+//		m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
+//	}
 
 }
 
