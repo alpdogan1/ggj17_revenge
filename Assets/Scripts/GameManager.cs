@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,17 +15,24 @@ public class GameManager : MonoBehaviour
 
 	#endregion
 	public float levelSpeed = .1f;
+	public float cachedLevelSpeed = .1f;
 	public float blockCountForKey = 1;
 //	public Transform blockContainer;
 //	public List<ReactingBlock> blocks;
 	public LayerMask groundLayer;
+	public Canvas mainCanvas;
+	public BlockSpawner blockSpawner;
+	public Spawner mobSpawner;
 
 	public Player2 player;
+
+	public bool gameEnded = false;
 
 	[Header("THE GAME")]
 	public int currentPlayerIndex = 0;
 	public float[] playerDistances = new float[]{0,0};
-	public float targetDistance = 50f;
+	public float winDistance = 50f;
+	public RectTransform[] playerIndicators;
 
 	public Bounds CameraBounds{
 		get{
@@ -35,6 +43,8 @@ public class GameManager : MonoBehaviour
 	void Start()
 	{
 		SetCameraSize ();
+		cachedLevelSpeed = levelSpeed;
+		levelSpeed = 0;
 
 		// Gather blocks
 //		ReactingBlock[] blocksArr = blockContainer.GetComponentsInChildren<ReactingBlock> ();
@@ -74,8 +84,52 @@ public class GameManager : MonoBehaviour
 	void RecordDistances()
 	{
 		playerDistances [currentPlayerIndex] += levelSpeed;
+
+		float currentDistance = playerDistances [currentPlayerIndex];
+		RectTransform indicator = playerIndicators [currentPlayerIndex];
+
+		float posPercent = currentDistance / winDistance;
+
+		float totalUIDistance = mainCanvas.pixelRect.size.x - 72;
+		float currentUIDistance = 36 + (totalUIDistance * posPercent);
+
+		if(posPercent >=1)
+		{
+//			EndGame ();
+			blockSpawner.GameEnded ();
+//			player.Win ();
+			return;
+		}
+
+		indicator.anchoredPosition = new Vector2 (currentUIDistance, indicator.anchoredPosition.y);
 	}
-//
+
+	public void StartGame()
+	{
+		player.gameObject.SetActive (true);
+		LeanTween.value (0, cachedLevelSpeed, .2f).setOnUpdate ((val) => {
+			levelSpeed = val;
+		});
+
+		player.GameStarted ();
+		blockSpawner.isActive = true;
+		mobSpawner.isActive = true;
+	}
+
+	public void EndGame()
+	{
+		gameEnded = true;
+		LeanTween.value (levelSpeed, 0, 2).setEase(LeanTweenType.easeInOutSine).setOnComplete(()=>{
+			player.Win();
+		})
+			.setOnUpdate ((val) => {
+			levelSpeed = val;
+		});
+
+		blockSpawner.isActive = false;
+		mobSpawner.isActive = false;
+
+	}
 //	void SpawnInitialBlocks()
 //	{
 //		while

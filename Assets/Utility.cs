@@ -1,8 +1,33 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Utility : MonoBehaviour
 {
+	#region Singleton
+	public static Utility Instance { private set; get; }
+
+	void Awake()
+	{
+		Instance = this;
+	}
+
+	#endregion
+
+	public void WaitTillAnimationTime(Animator animation, float time, int layer, Action callback)
+	{
+		StartCoroutine (WaitTillAnimationTimeRoutine (animation, time, layer, callback));
+	}
+
+	private IEnumerator WaitTillAnimationTimeRoutine(Animator anim, float time, int layer, Action callback)
+	{
+		while(anim != null && anim.GetCurrentAnimatorStateInfo(layer).normalizedTime < time)
+		{
+			//			print (anim.GetCurrentAnimatorStateInfo (0).normalizedTime);
+			yield return false;
+		}
+		callback ();
+	}
 }
 
 public static class Vector2Extension {

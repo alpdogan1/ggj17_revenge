@@ -4,14 +4,21 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour {
 
-	[SerializeField]private float itemWidth;
-	[SerializeField]private GameObject prefab;
-	[SerializeField]List<GameObject> activeItems = new List<GameObject>();
-	[SerializeField]List<GameObject> pool = new List<GameObject>();
-
+	[SerializeField]private float itemWidth = 1;
+	[SerializeField]private GameObject[] prefabs;
+	[SerializeField]public List<GameObject> activeItems = new List<GameObject>();
+	[SerializeField]public List<GameObject> pool = new List<GameObject>();
 
 	[SerializeField]private GameObject lastItem;
+	[Header("Random Y")]
+	[SerializeField]private bool randomY;
+	[SerializeField]private float randomYRange;
+	[Header("Random Scale")]
+	[SerializeField]private bool randomScale;
+	[SerializeField]private float randomScaleRange;
 
+
+	public bool isActive = false;
 
 	protected virtual void Start()
 	{
@@ -22,8 +29,12 @@ public class Spawner : MonoBehaviour {
 
 	protected virtual void FixedUpdate()
 	{
+		if(isActive)
+		{
+			CheckToSpawn ();
+		}
+
 		WatchItems ();
-		CheckToSpawn ();
 	}
 
 	void CheckToSpawn()
@@ -65,7 +76,7 @@ public class Spawner : MonoBehaviour {
 		GameObject newItem;
 
 		// Get pooled if available
-		if (pool.Count > 0) {
+		if (pool.Count > 0 && !ForceInstantiate()) {
 			
 			newItem = pool [0];
 			pool.RemoveAt (0);
@@ -75,7 +86,7 @@ public class Spawner : MonoBehaviour {
 		} 
 		else
 		{
-			newItem = Instantiate (prefab, pos, Quaternion.identity);
+			newItem = Instantiate (GetPrefab(), pos, Quaternion.identity);
 			newItem.transform.parent = transform;
 		}
 
@@ -84,8 +95,36 @@ public class Spawner : MonoBehaviour {
 			newItem.GetComponent<GroundReactorStatic> ().ReCache ();
 		}
 
+		if(newItem.GetComponent<GroundReactorDynamic>())
+		{
+			newItem.GetComponent<GroundReactorDynamic> ().spawner = this;
+		}
+
+		if(randomY)
+		{
+			float rngRange = Random.Range (0, randomYRange);
+			newItem.transform.position += Vector3.up * rngRange;
+
+		}
+		if(randomScale)
+		{
+			float rngScale = Random.Range (-randomScaleRange, randomScaleRange);
+			newItem.transform.localScale *= 1+ rngScale;
+		}
+
 		activeItems.Add (newItem);
 		lastItem = newItem;
+	}
+
+	protected virtual GameObject GetPrefab()
+	{
+		return prefabs [Random.Range (0, prefabs.Length)];
+//		return prefab;
+	}
+
+	protected virtual bool ForceInstantiate()
+	{
+		return true;
 	}
 
 	void PoolItem(GameObject block)

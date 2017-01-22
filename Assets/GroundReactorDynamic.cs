@@ -8,6 +8,8 @@ public class GroundReactorDynamic : MonoBehaviour
 	[SerializeField]protected Animator _animator;
 	[Space]
 	[SerializeField]protected bool m_isGrounded = false;
+//	public bool isDead = false;
+	public Spawner spawner;
 
 	void Start ()
 	{

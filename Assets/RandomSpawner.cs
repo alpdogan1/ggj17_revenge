@@ -23,10 +23,16 @@ public class RandomSpawner : Spawner
 
 	IEnumerator WaitRandomSeconds()
 	{
+		while(!isActive)
+		{
+			yield return false;
+		}
+
 		float randomSeconds = UnityEngine.Random.Range (seconds[0], seconds[1]);
 		print ("Random secons = " + randomSeconds);
 
 		yield return new WaitForSeconds (randomSeconds);
+
 
 		CreateItem (transform.position);
 		StartCoroutine (WaitRandomSeconds());
