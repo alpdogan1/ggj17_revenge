@@ -28,7 +28,6 @@ public class KeyPower : MonoBehaviour
 		this.index = index;
 		this.keyCode = GameControlManager2.Instance.keys[index];
 
-
 		// Block move up
 		currentTween = LeanTween.value (power, 1, GameControlManager2.Instance.moveUpTime)
 			.setEase (GameControlManager2.Instance.moveUpEasing)
@@ -69,7 +68,7 @@ public class KeyPower : MonoBehaviour
 		{
 			Vector3? force = GetForceForPosition (reactor.transform.position);
 
-			if(force != null)
+			if(force != null && !reactor.verticallyStatic)
 			{
 				Debug.DrawRay (reactor.transform.position, (Vector3)force * .1f, Color.red, .4f);
 				reactor.Bounced((Vector3)force);

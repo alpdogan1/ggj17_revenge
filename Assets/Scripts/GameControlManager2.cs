@@ -32,6 +32,7 @@ public class GameControlManager2 : MonoBehaviour {
 	[Range(0,1)]
 	public float topBouncePercent = .84f;
 	public float bounceForceMaxMagnitude = 10f;
+	public float bounceForceMinMagnitude = 6f;
 
 	public List<GroundReactorDynamic> dynamicReactors = new List<GroundReactorDynamic> ();
 

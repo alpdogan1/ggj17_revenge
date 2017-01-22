@@ -17,13 +17,26 @@ public class Player2 : GroundReactorDynamic
 
 	[Header("HorizontalMovement")]
 	[SerializeField]float _targetPosX;
-	
+
+	public CharBit[] bits;
+	public HealtIndicator healthIndicator;
+	public StunIndicator stunIndicator;
+
+	void Start()
+	{
+		bits = GetComponentsInChildren<CharBit> ();
+	}
+
 	protected override void FixedUpdate ()
 	{
+
 		base.FixedUpdate ();
 		if(!isDead)
 			CheckMinY ();
 
+		if (GameManager.Instance.gameEnded)
+			return;
+		
 		// Movement
 		float h = CrossPlatformInputManager.GetAxis("Horizontal");
 //		float v = CrossPlatformInputManager.GetAxis("Vertical");
@@ -35,6 +48,7 @@ public class Player2 : GroundReactorDynamic
 
 	private Vector3 move;
 	private bool jump; 
+
 	protected override void Update()
 	{
 		if(!isDead)
@@ -100,6 +114,8 @@ public class Player2 : GroundReactorDynamic
 
 		lives -= 1;
 
+		healthIndicator.Show (lives);
+
 		ProCamera2DShake.Instance.Shake ();
 
 		if (lives <= 0) {
@@ -156,19 +172,23 @@ public class Player2 : GroundReactorDynamic
 		if(GameManager.Instance.currentPlayerIndex == 0)
 		{
 			GameManager.Instance.currentPlayerIndex = 1;
-
 		}
 		else
 		{
 			GameManager.Instance.currentPlayerIndex = 0;
 		}
 
+		foreach (var item in bits) {
+			item.ChooseBit (GameManager.Instance.currentPlayerIndex);
+		}
+
 		GameManager.Instance.playerIndicators [GameManager.Instance.currentPlayerIndex].transform.GetChild (0).gameObject.SetActive (true);
 
-		lives = 5;
+		lives = 2;
 		m_isGrounded = false;
 
-		yield return new WaitForSeconds (2f);
+		// Delay before respawn
+		yield return new WaitForSeconds (.5f);
 
 		// Throw Char
 		Vector3 firstRespawnPos = new Vector3(GameManager.Instance.CameraBounds.min.x, GameManager.Instance.CameraBounds.min.y + 4, 0);
@@ -211,7 +231,7 @@ public class Player2 : GroundReactorDynamic
 		StartCoroutine (WaitForGrounded ());
 
 		_animator.SetTrigger ("DelayTouch");
-		yield return new WaitForSeconds (5f);
+		yield return new WaitForSeconds (1.8f);
 		_animator.SetTrigger ("DelayTouch");
 		_collider.isTrigger = false;
 	}
@@ -220,6 +240,11 @@ public class Player2 : GroundReactorDynamic
 	{
 		print ("triggered win");
 		_animator.SetTrigger ("Win");
+	}
+
+	protected override void AfterBounced ()
+	{
+		stunIndicator.Show ();
 	}
 }
 

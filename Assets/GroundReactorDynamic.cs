@@ -8,6 +8,8 @@ public class GroundReactorDynamic : MonoBehaviour
 	[SerializeField]protected Animator _animator;
 	[Space]
 	[SerializeField]protected bool m_isGrounded = false;
+
+	public bool verticallyStatic;
 //	public bool isDead = false;
 	public Spawner spawner;
 
@@ -64,7 +66,7 @@ public class GroundReactorDynamic : MonoBehaviour
 
 
 		// Min force
-		float minMagn = 4;
+		float minMagn = GameControlManager2.Instance.bounceForceMinMagnitude;
 		if(force.sqrMagnitude < minMagn * minMagn)
 		{
 			print ("Increasing Force");
@@ -82,6 +84,13 @@ public class GroundReactorDynamic : MonoBehaviour
 		_rigidbody.AddForce (force, ForceMode2D.Impulse);
 
 		StartCoroutine (WaitForGrounded ());
+
+		AfterBounced ();
+	}
+
+	protected virtual void AfterBounced()
+	{
+		
 	}
 
 	public IEnumerator WaitForGrounded()

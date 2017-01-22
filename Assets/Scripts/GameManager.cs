@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
 	public LayerMask groundLayer;
 	public Canvas mainCanvas;
 	public BlockSpawner blockSpawner;
-	public Spawner mobSpawner;
+	public Spawner[] mobSpawner;
 
 	public Player2 player;
 
@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
+	public GameManager credits;
+
 	void Start()
 	{
 		SetCameraSize ();
@@ -55,6 +57,15 @@ public class GameManager : MonoBehaviour
 	void Update()
 	{
 		RecordDistances ();
+
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			Application.LoadLevel (0);
+		}
+		if(Input.GetKeyDown(KeyCode.C))
+		{
+			credits.gameObject.SetActive (true);
+		}
 	}
 
 	public void SetCameraSize()
@@ -113,7 +124,11 @@ public class GameManager : MonoBehaviour
 
 		player.GameStarted ();
 		blockSpawner.isActive = true;
-		mobSpawner.isActive = true;
+
+		foreach (var item in mobSpawner) 
+		{
+			item.isActive = true;
+		}
 	}
 
 	public void EndGame()
@@ -127,7 +142,11 @@ public class GameManager : MonoBehaviour
 		});
 
 		blockSpawner.isActive = false;
-		mobSpawner.isActive = false;
+
+		foreach (var item in mobSpawner) 
+		{
+			item.isActive = false;
+		}
 
 	}
 //	void SpawnInitialBlocks()

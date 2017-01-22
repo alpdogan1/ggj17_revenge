@@ -8,6 +8,8 @@ public class Zombie : GroundReactorDynamic
 	[SerializeField]float height = 1f;
 	[SerializeField]GameObject blowPrefab;
 	[SerializeField]SpriteRenderer[] spriteRenderers;
+	public Vector3 blowOffset = Vector3.zero;
+	public bool isKillable = true;
 
 	void Awake()
 	{
@@ -22,7 +24,7 @@ public class Zombie : GroundReactorDynamic
 		base.FixedUpdate ();
 		float posY = GameControlManager2.Instance.GetPositionFor (gameObject);
 
-		if(transform.position.y < posY)
+		if(transform.position.y < posY || verticallyStatic)
 		{
 			transform.position = new Vector3 (transform.position.x, posY);
 		}
@@ -40,7 +42,7 @@ public class Zombie : GroundReactorDynamic
 	{
 		if(coll.transform.GetComponent<Player2>())
 		{
-			if (coll.transform.position.y > transform.position.y + height || GameManager.Instance.gameEnded) 
+			if ((coll.transform.position.y > transform.position.y + height && isKillable) || GameManager.Instance.gameEnded) 
 			{
 				GameControlManager2.Instance.dynamicReactors.Remove (this);
 
@@ -68,9 +70,11 @@ public class Zombie : GroundReactorDynamic
 
 		GameObject blow = Instantiate (blowPrefab, transform.position + (Vector3.up * height / 2), Quaternion.identity) as GameObject;
 
+		blow.transform.position += blowOffset;
 		blow.transform.parent = transform;
 
 		Animator blowAnim = blow.GetComponent<Animator> ();
+
 		Utility.Instance.WaitTillAnimationTime (blowAnim, .14f, 0, () => {
 
 //			Destroy 
@@ -80,7 +84,7 @@ public class Zombie : GroundReactorDynamic
 
 		});
 
-		Utility.Instance.WaitTillAnimationTime (blowAnim, 1f, 0, () => {
+		Utility.Instance.WaitTillAnimationTime (blowAnim, .9f, 0, () => {
 
 //			Destroy (blow);
 			Destroy(gameObject);
