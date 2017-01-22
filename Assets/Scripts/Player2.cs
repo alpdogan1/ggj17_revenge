@@ -82,6 +82,11 @@ public class Player2 : GroundReactorDynamic
 		}
 	}
 
+	public void GameStarted()
+	{
+		_animator.SetTrigger ("Run");
+	}
+
 	public void KilledMob()
 	{
 		_rigidbody.velocity = Vector3.zero;
@@ -90,6 +95,9 @@ public class Player2 : GroundReactorDynamic
 
 	public void LoseLife()
 	{
+		if (GameManager.Instance.gameEnded)
+			return;
+
 		lives -= 1;
 
 		ProCamera2DShake.Instance.Shake ();
@@ -132,6 +140,8 @@ public class Player2 : GroundReactorDynamic
 		Bounds camBounds = GameManager.Instance.CameraBounds;
 		Vector3 dieTarget = new Vector3 (transform.position.x - .3f,camBounds.min.y - 2f);
 
+		GameManager.Instance.levelSpeed = 0;
+
 		LeanTween.move (gameObject, dieTarget, dieDuration).setEase(dieEasingCurve)
 			.setOnComplete(()=>{
 				StartCoroutine(Swap());
@@ -141,15 +151,19 @@ public class Player2 : GroundReactorDynamic
 
 	IEnumerator Swap()
 	{
-		
+		GameManager.Instance.playerIndicators [GameManager.Instance.currentPlayerIndex].transform.GetChild (0).gameObject.SetActive (false);
+
 		if(GameManager.Instance.currentPlayerIndex == 0)
 		{
 			GameManager.Instance.currentPlayerIndex = 1;
+
 		}
 		else
 		{
 			GameManager.Instance.currentPlayerIndex = 0;
 		}
+
+		GameManager.Instance.playerIndicators [GameManager.Instance.currentPlayerIndex].transform.GetChild (0).gameObject.SetActive (true);
 
 		lives = 5;
 		m_isGrounded = false;
@@ -171,7 +185,7 @@ public class Player2 : GroundReactorDynamic
 		float cachedTS = Time.timeScale;
 
 		// Stop Level
-		float cachedLS = GameManager.Instance.levelSpeed;
+//		float cachedLS = GameManager.Instance.levelSpeed;
 		GameManager.Instance.levelSpeed = 0;
 
 		// Stop Char
@@ -183,11 +197,13 @@ public class Player2 : GroundReactorDynamic
 			yield return true;
 		}
 
+
 		_rigidbody.velocity = Vector3.zero;
 		_rigidbody.AddForce (Vector3.right * 7, ForceMode2D.Impulse);
 		_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-		GameManager.Instance.levelSpeed = cachedLS;
+//		GameManager.Instance.levelSpeed = cachedLS;
+		GameManager.Instance.levelSpeed = GameManager.Instance.cachedLevelSpeed;
 //		Time.timeScale = cachedTS;
 
 		this.enabled = true;
@@ -200,5 +216,10 @@ public class Player2 : GroundReactorDynamic
 		_collider.isTrigger = false;
 	}
 
+	public void Win()
+	{
+		print ("triggered win");
+		_animator.SetTrigger ("Win");
+	}
 }
 

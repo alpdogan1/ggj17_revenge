@@ -117,5 +117,10 @@ public class Player : MonoBehaviour
 		jump = false;
 	}
 
+	public void GameStarted()
+	{
+		
+	}
+
 //}
 }
