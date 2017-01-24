@@ -108,10 +108,10 @@ public class GameControlManager2 : MonoBehaviour {
 			KeyPower kp = livingKeyPowers [i];
 
 			float el = kp.GetElevationForPosition (go.transform.position);
-//			totalEl += el;
-			el = Mathf.Clamp (el, 0, maxInfluenceElevation);
+			totalEl += el;
 
-			return el;
+//			el = Mathf.Clamp (el, 0, maxInfluenceElevation);
+//			return el;
 		}
 
 //		return 0;

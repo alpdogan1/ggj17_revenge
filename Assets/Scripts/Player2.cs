@@ -104,7 +104,7 @@ public class Player2 : GroundReactorDynamic
 	public void KilledMob()
 	{
 		_rigidbody.velocity = Vector3.zero;
-		_rigidbody.AddForce (Vector3.up * 10, ForceMode2D.Impulse);
+		_rigidbody.AddForce (Vector3.up * 12, ForceMode2D.Impulse);
 	}
 
 	public void LoseLife()

@@ -40,10 +40,12 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
-	public GameManager credits;
+	public GameObject credits;
 
 	void Start()
 	{
+//		Screen.SetResolution (1920, 1080, true);
+
 		SetCameraSize ();
 		cachedLevelSpeed = levelSpeed;
 		levelSpeed = 0;
@@ -62,9 +64,18 @@ public class GameManager : MonoBehaviour
 		{
 			Application.LoadLevel (0);
 		}
-		if(Input.GetKeyDown(KeyCode.C))
+
+		if(Input.GetKeyDown(KeyCode.F1))
 		{
-			credits.gameObject.SetActive (true);
+			if(credits.activeSelf)
+			{
+				credits.gameObject.SetActive (false);
+			} 
+			else
+			{
+				credits.gameObject.SetActive (true);
+				
+			}
 		}
 	}
 
